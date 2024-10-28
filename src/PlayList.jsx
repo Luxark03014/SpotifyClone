@@ -1,6 +1,7 @@
 import { assets } from "./assets/assets";
 import { BotonPlayList } from "./components/BotonPlayList";
 import { PlaylistCard } from "./components/PlaylistCard";
+import { Radio } from "./components/Radio";
 
 export const PlayList = () => {
 
@@ -34,6 +35,7 @@ export const PlayList = () => {
         </div>
        
         <div className="flex flex-col">
+            <Radio />
             <PlaylistCard imagen={assets.tegustan} titulo="Canciones que te gustan" subtitulo="Lista · 10 canciones" />
             <PlaylistCard imagen={assets.radio} titulo="Radio" subtitulo="Lista · 10 emisoras" />
             <PlaylistCard imagen={assets.animalCrossing} titulo="Animal Crossing Music" subtitulo="Lista · 8 canciones" />

@@ -1,7 +1,7 @@
 import { assets } from "./assets/assets";
 import { useState } from "react";
 import { Howl, Howler } from "howler";
-import { SongsProvider } from "./context/SongContext";
+
 export const Footer = () => {
   const [pause, setPause] = useState(false);
 
@@ -13,7 +13,7 @@ export const Footer = () => {
 
 
   return (
-    <SongsProvider>
+   
     <footer className="w-full h-20 flex items-center  bg-black text-white">
       <div className="p-4">
         <div className="bg-white w-12 h-12"></div> {/*Icono Provisional */}
@@ -71,6 +71,6 @@ export const Footer = () => {
           </button>
       </div>
     </footer>
-    </SongsProvider>
+  
   );
 };

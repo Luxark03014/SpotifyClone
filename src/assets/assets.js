@@ -42,12 +42,12 @@ import song1 from  './song1.mp3'
 import song2 from  './song2.mp3'
 import song3 from  './song3.mp3'
 import tegustan from './te-gustan.png'
-import radio from './radio.png'
+/*import radio from './radio.png'
 import lockedIn from './lockedIn.png'
 import lofi from './lofi.png'
 import berlinTechno from './berlin-techno.png'
 import animalCrossing from './animal-crossing.png'
-import topHits from './top-hits.png'
+import topHits from './top-hits.png' */
 
 export const assets = {
     bell_icon,
@@ -74,7 +74,7 @@ export const assets = {
     arrow_right,
     spotify_logo,
     clock_icon,
-    tegustan,
+    tegustan/*
     radio,
     lockedIn,
     berlinTechno,
@@ -84,7 +84,7 @@ export const assets = {
     img14,
     img9,
     img10,
-    img16
+    img16*/
 }
 
 export const albumsData = [
