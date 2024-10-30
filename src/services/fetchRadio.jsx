@@ -1,6 +1,6 @@
 
 
-export const fetchRadio = async () => { 
+ const fetchRadio = async () => { 
     try {
         const response = await fetch('http://172.17.131.175:3000/api/radios');
         if (!response.ok) {
@@ -10,4 +10,5 @@ export const fetchRadio = async () => {
     } catch (error) {
         console.error('Failed to fetch radio', error);
     }}
-    
+
+    export default fetchRadio;
