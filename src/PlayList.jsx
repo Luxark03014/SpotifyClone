@@ -2,14 +2,22 @@ import { assets } from "./assets/assets";
 import { BotonPlayList } from "./components/BotonPlayList";
 import { PlaylistCard } from "./components/PlaylistCard";
 import { Radio } from "./components/Radio";
+import { songs } from "./data/songs";
 
-export const PlayList = () => {
+import { useState } from "react";
 
+export const PlayList = ( {onSongSelect}) => {
+ 
+
+  const handleSongClick = (song) => {
+    onSongSelect(song);
+  };
+  
     
 
 
   return (
-    <section className="w-1/5 bg-gris-spotify-oscuro p-2 h-fit mx-2 rounded-lg flex-grow">
+    <section className="w-1/5 bg-gris-spotify-oscuro p-2 rounded-lg flex-grow">
       <div className="flex items-center ">
         <img className="mt-4 mx-4 w-6 h-6" src={assets.stack_icon} />
         <h2 className="text-gris-texto mt-4 ">Tu biblioteca</h2>
@@ -36,14 +44,15 @@ export const PlayList = () => {
        
         <div className="flex flex-col">
             <Radio />
-            <PlaylistCard imagen={assets.tegustan} titulo="Canciones que te gustan" subtitulo="Lista · 10 canciones" />
-            <PlaylistCard imagen={assets.radio} titulo="Radio" subtitulo="Lista · 10 emisoras" />
-            <PlaylistCard imagen={assets.animalCrossing} titulo="Animal Crossing Music" subtitulo="Lista · 8 canciones" />
-            <PlaylistCard imagen={assets.lockedIn} titulo="Locked In" subtitulo="Lista · 12 canciones" />
-            <PlaylistCard imagen={assets.topHits} titulo="Top Hits" subtitulo="Lista · 8 canciones" />
-            <PlaylistCard imagen={assets.berlinTechno} titulo="Berlin Techno" subtitulo="Lista · 10 canciones" />
-            <PlaylistCard imagen={assets.img14} titulo="Phonk Playlist" subtitulo="Lista · 10 canciones" />
-            <PlaylistCard imagen={assets.img9} titulo="Top 50 Mundial" subtitulo="Lista · 10 canciones" />
+            {songs.canciones.map((cancion) => (
+          <PlaylistCard
+            key={cancion.id}
+            imagen={cancion.portada}
+            titulo={cancion.titulo}
+            subtitulo={`${cancion.artista} · ${Math.floor(cancion.duracion / 60)}:${String(cancion.duracion % 60).padStart(2, '0')}`}
+            onClick={() => handleSongClick(cancion)}
+            />
+        ))}
         </div>
     </section>
   );

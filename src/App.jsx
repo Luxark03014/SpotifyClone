@@ -5,14 +5,16 @@ import { Footer } from './Footer';
 import { MainLayout } from './MainLayout';
 import { InfoArtista } from './InfoArtista';
 function App() {
+  const [selectedSong, setSelectedSong] = useState(null);
+
   return (
     <>
-      <div className="flex flex-col bg-black  min-h-screen">
+      <div className="flex flex-col bg-black min-h-screen">
         <Header />
-        <div className="flex  bg-black  min-h-screen">
-        <PlayList  />
+        <div className="flex flex-grow ">
+        <PlayList  onSongSelect={setSelectedSong}/>
         <MainLayout />
-        <InfoArtista />
+        <InfoArtista song={selectedSong}/>
         </div>
         <Footer />
       </div>
