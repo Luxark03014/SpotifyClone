@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from './Header';
 import { PlayList } from './PlayList';
 import { Footer } from './Footer';
@@ -9,14 +9,22 @@ import { useHowler } from './hooks/useHowler';
 
 function App() {
   const [selectedSong, setSelectedSong] = useState(null);
-  const { play, pause, isPlaying, prev, next } = useHowler(selectedSong ? selectedSong.src : null, songs.canciones);
+  const { play, pause, isPlaying, prev, next, currentSongIndex } = useHowler(selectedSong ? selectedSong.src : null, songs);
 
   const handleSongSelect = (song) => {
     setSelectedSong(song);
     console.log("Canción seleccionada:", song.titulo);
   };
 
-  console.log("Estados y funciones:", { isPlaying, play, pause, prev, next });
+  // Actualiza selectedSong basado en currentIndex
+  useEffect(() => {
+    if (currentSongIndex >= 0 && currentSongIndex < songs.canciones.length) {
+      const song = songs.canciones[currentSongIndex]; // Consigue la canción según el índice
+      setSelectedSong(song);
+      console.log("Canción actualizada:", song.titulo);
+    }
+  }, [currentSongIndex]); // Cambia la dependencia a currentSongIndex
+  
 
   return (
     <div className="flex flex-col bg-black min-h-screen">

@@ -7,25 +7,31 @@ export const useHowler = (initialSrc, songs) => {
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
 
   useEffect(() => {
-    // Descarga cualquier sonido actual antes de cargar uno nuevo
+    if (!songs || !songs.canciones || songs.canciones.length === 0) {
+      console.error("Songs or canciones are not defined.");
+      return; // Exit if no songs are available
+    }
+
+    // Si hay un sonido en reproducción, lo detiene y lo elimina
     if (sound) {
-      sound.unload();
+      sound.unload(); // Desenlaza el sonido anterior
       setIsPlaying(false);
     }
 
-    // Si hay una nueva fuente, crea y asigna un nuevo sonido
+    // Si se proporciona una fuente inicial válida, crea una nueva instancia de Howl
     if (initialSrc) {
       const newSound = new Howl({
         src: [initialSrc],
         html5: true,
-        onend: () => next(),
+        onend: () => next(), // Reproduce automáticamente la siguiente canción cuando termine la actual
       });
       setSound(newSound);
+      newSound.play(); // Inicia la reproducción de la canción
+      setIsPlaying(true); // Cambia el estado a reproducido
     }
-  }, [initialSrc]);
+  }, [initialSrc, songs]);
 
   const play = () => {
-    console.log("Intentando reproducir");
     if (sound) {
       sound.play();
       setIsPlaying(true);
@@ -33,7 +39,6 @@ export const useHowler = (initialSrc, songs) => {
   };
 
   const pause = () => {
-    console.log("Intentando pausar");
     if (sound) {
       sound.pause();
       setIsPlaying(false);
@@ -52,19 +57,27 @@ export const useHowler = (initialSrc, songs) => {
 
   const loadSong = (index) => {
     if (songs.canciones[index]) {
-      setCurrentSongIndex(index);
-      setIsPlaying(false);
-      const newSound = new Howl({
-        src: [songs.canciones[index].src],
-        volume: 1.0,
-        html5: true,
-        onend: () => next(),
-      });
-      setSound(newSound);
-      newSound.play();
-      setIsPlaying(true);
+        if (sound) {
+            sound.unload(); // Desenlaza el sonido anterior
+        }
+
+        setCurrentSongIndex(index); // Cambia el índice actual
+
+        const newSound = new Howl({
+            src: [songs.canciones[index].src],
+            volume: 1.0,
+            html5: true,
+            onend: () => next(),
+        });
+        setSound(newSound);
+        newSound.play(); // Reproduce la nueva canción
+        setIsPlaying(true); // Cambia el estado a reproducido
+        
+        // Aquí actualiza la canción seleccionada
+        setSelectedSong(songs.canciones[index]);
     }
-  };
+};
+
 
   return {
     play,
@@ -72,5 +85,6 @@ export const useHowler = (initialSrc, songs) => {
     isPlaying,
     prev,
     next,
+    currentSongIndex,
   };
 };
