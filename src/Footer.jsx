@@ -1,76 +1,38 @@
-import { assets } from "./assets/assets";
-import { useState } from "react";
-import { Howl, Howler } from "howler";
-
-export const Footer = () => {
-  const [pause, setPause] = useState(false);
-
-  
-
-  function clickPause() {
-    setPause(!pause);
-  }
-
-
+export const Footer = ({ song, isPlaying, play, pause, prev, next }) => {
   return (
-   
-    <footer className="w-full h-20 flex items-center  bg-black text-white">
-      <div className="p-4">
-        <div className="bg-white w-12 h-12"></div> {/*Icono Provisional */}
-      </div>
-      <div className="flex flex-col">
-        <h1 className="text-md">Titulo Cancion</h1>
-        <h3 className="text-sm">Artista</h3>
-      </div>
-
-      <div className="justify-center items-center">
-        <div className="gap-6">
-          <button>
-            <img className="w-4 h-4" src={assets.shuffle_icon} />
-          </button>
-          <button>
-            <img className="w-4 h-4"  src={assets.prev_icon} />
-          </button>
-
-          <button onClick={clickPause}>
-            {pause ? (
-              <img className="w-4 h-4"  src={assets.pause_icon} />
-            ) : (
-              <img className="w-4 h-4"  src={assets.play_icon} />
-            )}
-          </button>
-          <button>
-            <img className="w-4 h-4"  src={assets.next_icon} />
-          </button>
-          <button>
-            <img className="w-4 h-4"  src={assets.loop_icon} />
-          </button>
+    <footer className="w-full h-20 flex items-center bg-black text-white">
+      {song ? (
+        <>
+          <div className="p-4">
+            <img src={song.portada} alt={song.titulo} className="w-12 h-12 rounded-sm" />
+          </div>
+          <div className="flex flex-col">
+            <h1 className="text-md font-bold">{song.titulo}</h1>
+            <h3 className="text-sm font-semibold">{song.artista}</h3>
+          </div>
+          <div className="flex flex-grow justify-center items-center">
+            <div className="flex justify-center items-center gap-6">
+              <button onClick={prev}>
+                <img className="w-4 h-4" src="/assets/prev.png" alt="Previous" />
+              </button>
+              <button onClick={() => (isPlaying ? pause() : play())}>
+                {isPlaying ? (
+                  <img className="w-4 h-4" src="/assets/pause.png" alt="Pause" />
+                ) : (
+                  <img className="w-4 h-4" src="/assets/play.png" alt="Play" />
+                )}
+              </button>
+              <button onClick={next}>
+                <img className="w-4 h-4" src="/assets/next.png" alt="Next" />
+              </button>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="flex-grow text-center">
+          <h3 className="text-md">Selecciona una canción para reproducir</h3>
         </div>
-      </div>
-      <div className="ml-auto gap-4 flex mx-5">
-        <button>
-            <img className="w-4 h-4"  src={assets.plays_icon} />
-          </button>
-          <button>
-            <img className="w-4 h-4"  src={assets.mic_icon} />
-          </button>
-          <button>
-            <img className="w-4 h-4"  src={assets.queue_icon} />
-          </button>
-          <button>
-            <img className="w-4 h-4"  src={assets.speaker_icon} />
-          </button>
-          <button>
-            <img className="w-4 h-4"  src={assets.volume_icon} />
-          </button>
-          <button>
-            <img className="w-4 h-4"  src={assets.mini_player_icon} />
-          </button>
-          <button>
-            <img className="w-4 h-4"  src={assets.zoom_icon} />
-          </button>
-      </div>
+      )}
     </footer>
-  
   );
 };

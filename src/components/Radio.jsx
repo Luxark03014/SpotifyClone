@@ -40,9 +40,10 @@ const handleSelectRadio = (radio) => {
         ))}
       </ul>
       <div>
+        {/*
         <button onClick={play} disabled={isPlaying() || !selectedRadio}>Play</button>
         <button onClick={pause} disabled={!isPlaying()}>Pause</button>
-        <button onClick={stop} disabled={!isPlaying()}>Stop</button>
+        <button onClick={stop} disabled={!isPlaying()}>Stop</button>*/}
       </div>
     </div>
   );

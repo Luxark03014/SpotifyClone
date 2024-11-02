@@ -1,59 +1,76 @@
-import { useState , useEffect } from 'react';
+import { useEffect, useState } from "react";
+import { Howl } from "howler";
 
-import { Howl } from 'howler';
+export const useHowler = (initialSrc, songs) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [sound, setSound] = useState(null);
+  const [currentSongIndex, setCurrentSongIndex] = useState(0);
 
-export const  useHowler = (url) => {
-    const [sound, setSound] = useState(null);
-
-    useEffect(() => {
-        if (!url) return;
-
-        const newSound = new Howl({
-            src: [url],
-            format: ['mp3'],
-            html5: true,
-            volume: 0.5,
-            onend: () => {
-                console.log('Terminó la canción');
-            },
-        });
-
-        setSound(newSound);
-        newSound.play();
-
-        return () => {
-            newSound.stop();
-            newSound.unload();
-          
-        };
-    }, [url]);
-
-    const play = () => {
-        if (sound) {
-            sound.play();
-        }
-    };
-
-    const pause = () => {
-        if (sound) {
-            sound.pause();
-        }
-    };
-    
-    const stop = () => {
-        if (sound) {
-            sound.stop();
-        }
-    };
-
-    const isPlaying = () => {
-        return sound ? sound.playing() : false;
-    };  
-
-    return{
-        play,
-        pause,
-        stop,
-        isPlaying,
+  useEffect(() => {
+    // Descarga cualquier sonido actual antes de cargar uno nuevo
+    if (sound) {
+      sound.unload();
+      setIsPlaying(false);
     }
-}
+
+    // Si hay una nueva fuente, crea y asigna un nuevo sonido
+    if (initialSrc) {
+      const newSound = new Howl({
+        src: [initialSrc],
+        html5: true,
+        onend: () => next(),
+      });
+      setSound(newSound);
+    }
+  }, [initialSrc]);
+
+  const play = () => {
+    console.log("Intentando reproducir");
+    if (sound) {
+      sound.play();
+      setIsPlaying(true);
+    }
+  };
+
+  const pause = () => {
+    console.log("Intentando pausar");
+    if (sound) {
+      sound.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  const next = () => {
+    const newIndex = (currentSongIndex + 1) % songs.canciones.length;
+    loadSong(newIndex);
+  };
+
+  const prev = () => {
+    const newIndex = (currentSongIndex - 1 + songs.canciones.length) % songs.canciones.length;
+    loadSong(newIndex);
+  };
+
+  const loadSong = (index) => {
+    if (songs.canciones[index]) {
+      setCurrentSongIndex(index);
+      setIsPlaying(false);
+      const newSound = new Howl({
+        src: [songs.canciones[index].src],
+        volume: 1.0,
+        html5: true,
+        onend: () => next(),
+      });
+      setSound(newSound);
+      newSound.play();
+      setIsPlaying(true);
+    }
+  };
+
+  return {
+    play,
+    pause,
+    isPlaying,
+    prev,
+    next,
+  };
+};
