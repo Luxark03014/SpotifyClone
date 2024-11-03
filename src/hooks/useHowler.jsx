@@ -1,90 +1,141 @@
-import { useEffect, useState } from "react";
-import { Howl } from "howler";
+import { useEffect, useState } from 'react';
+import { Howl, Howler } from 'howler';
 
 export const useHowler = (initialSrc, songs) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [sound, setSound] = useState(null);
-  const [currentSongIndex, setCurrentSongIndex] = useState(0);
+    const [sound, setSound] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentSongIndex, setCurrentSongIndex] = useState(0);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [analyser, setAnalyser] = useState(null);
+    const [dataArray, setDataArray] = useState(null);
 
-  useEffect(() => {
-    if (!songs || !songs.canciones || songs.canciones.length === 0) {
-      console.error("Songs or canciones are not defined.");
-      return; // Exit if no songs are available
-    }
-
-    // Si hay un sonido en reproducción, lo detiene y lo elimina
-    if (sound) {
-      sound.unload(); // Desenlaza el sonido anterior
-      setIsPlaying(false);
-    }
-
-    // Si se proporciona una fuente inicial válida, crea una nueva instancia de Howl
-    if (initialSrc) {
-      const newSound = new Howl({
-        src: [initialSrc],
-        html5: true,
-        onend: () => next(), // Reproduce automáticamente la siguiente canción cuando termine la actual
-      });
-      setSound(newSound);
-      newSound.play(); // Inicia la reproducción de la canción
-      setIsPlaying(true); // Cambia el estado a reproducido
-    }
-  }, [initialSrc, songs]);
-
-  const play = () => {
-    if (sound) {
-      sound.play();
-      setIsPlaying(true);
-    }
-  };
-
-  const pause = () => {
-    if (sound) {
-      sound.pause();
-      setIsPlaying(false);
-    }
-  };
-
-  const next = () => {
-    const newIndex = (currentSongIndex + 1) % songs.canciones.length;
-    loadSong(newIndex);
-  };
-
-  const prev = () => {
-    const newIndex = (currentSongIndex - 1 + songs.canciones.length) % songs.canciones.length;
-    loadSong(newIndex);
-  };
-
-  const loadSong = (index) => {
-    if (songs.canciones[index]) {
-        if (sound) {
-            sound.unload(); // Desenlaza el sonido anterior
+    useEffect(() => {
+        if (!songs || !songs.canciones || songs.canciones.length === 0) {
+            console.error("Songs or canciones are not defined.");
+            return;
         }
 
-        setCurrentSongIndex(index); // Cambia el índice actual
+        if (initialSrc) {
+            const newSound = new Howl({
+                src: [initialSrc],
+                html5: true,
+                onload: () => {
+                    setDuration(newSound.duration());
 
-        const newSound = new Howl({
-            src: [songs.canciones[index].src],
-            volume: 1.0,
-            html5: true,
-            onend: () => next(),
-        });
-        setSound(newSound);
-        newSound.play(); // Reproduce la nueva canción
-        setIsPlaying(true); // Cambia el estado a reproducido
-        
-        // Aquí actualiza la canción seleccionada
-        setSelectedSong(songs.canciones[index]);
-    }
-};
+                    // Crear el analizador
+                    const audioContext = Howler.ctx;
+                    const analyserNode = audioContext.createAnalyser();
+                    analyserNode.fftSize = 2048;
+                    const bufferLength = analyserNode.frequencyBinCount;
+                    const newDataArray = new Uint8Array(bufferLength);
+                    setDataArray(newDataArray);
+                    setAnalyser(analyserNode);
 
+                    // Conectar el analizador al nodo de salida
+                    newSound.connect(analyserNode);
+                    analyserNode.connect(audioContext.destination);
+                },
+                onplay: () => {
+                    setIsPlaying(true);
+                },
+                onend: () => {
+                    next();
+                },
+                onpause: () => {
+                    setIsPlaying(false);
+                },
+            });
 
-  return {
-    play,
-    pause,
-    isPlaying,
-    prev,
-    next,
-    currentSongIndex,
-  };
+            setSound(newSound);
+        }
+
+        return () => {
+            if (sound) {
+                sound.stop();
+                sound.unload();
+            }
+        };
+    }, [initialSrc, songs]);
+
+    useEffect(() => {
+        let intervalId;
+        if (isPlaying && sound) {
+            intervalId = setInterval(() => {
+                setCurrentTime(sound.seek());
+            }, 1000);
+        }
+        return () => clearInterval(intervalId);
+    }, [isPlaying, sound]);
+
+    const play = () => {
+        if (sound) {
+            sound.play();
+        }
+    };
+
+    const pause = () => {
+        if (sound) {
+            sound.pause();
+        }
+    };
+
+    const next = () => {
+        const newIndex = (currentSongIndex + 1) % songs.canciones.length;
+        loadSong(newIndex);
+    };
+
+    const prev = () => {
+        const newIndex = (currentSongIndex - 1 + songs.canciones.length) % songs.canciones.length;
+        loadSong(newIndex);
+    };
+
+    const loadSong = (index) => {
+        if (songs.canciones[index]) {
+            const currentSong = songs.canciones[currentSongIndex];
+            if (sound) {
+                sound.stop();
+                sound.unload();
+            }
+            setCurrentSongIndex(index);
+            const newSrc = songs.canciones[index].src;
+            const newSound = new Howl({
+                src: [newSrc],
+                html5: true,
+                onload: () => {
+                    setDuration(newSound.duration());
+                },
+                onplay: () => {
+                    setIsPlaying(true);
+                },
+            });
+
+            newSound.connect(analyser);
+            analyser.connect(Howler.masterGain);
+            setSound(newSound);
+            newSound.play();
+        }
+    };
+
+    const seek = (time) => {
+        if (sound) {
+            sound.seek(time);
+            setCurrentTime(time);
+        }
+    };
+
+    return {
+        sound,
+        play,
+        pause,
+        isPlaying,
+        prev,
+        next,
+        currentSongIndex,
+        currentTime,
+        duration,
+        seek,
+        analyser,
+        dataArray,
+    };
 };
