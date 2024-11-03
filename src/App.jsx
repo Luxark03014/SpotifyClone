@@ -27,7 +27,7 @@ const App = () => {
   return (
     <div className="flex flex-col bg-black min-h-screen">
       <Header />
-      <div className="flex flex-grow">
+      <div className="flex flex-grow gap-4">
         <PlayList onSongSelect={handleSongSelect} />
         <MainLayout 
           currentSong={songs.canciones[currentSongIndex]} 
