@@ -8,12 +8,36 @@ import { songs } from './data/songs';
 import { useHowler } from './hooks/useHowler';
 
 const App = () => {
-  const [selectedSong, setSelectedSong] = useState(null);
-  const { sound, play, pause, isPlaying, prev, next, currentSongIndex, currentTime, duration, seek, analyser, dataArray, changeVolume, changeHighshelfGain } = useHowler(selectedSong ? selectedSong.src : null, songs);
+  const [selectedSong, setSelectedSong] = useState(null); // Inicia en null para mostrar el mensaje en Footer
+  const {
+    sound,
+    play,
+    pause,
+    isPlaying,
+    prev,
+    next,
+    currentSongIndex,
+    currentTime,
+    duration,
+    seek,
+    analyser,
+    dataArray,
+    changeVolume,
+    changeHighshelfGain,
+  } = useHowler(selectedSong ? selectedSong.src : null, songs);
 
   const handleSongSelect = (song) => {
     setSelectedSong(song);
     console.log("Canción seleccionada:", song.titulo);
+  };
+
+  // Sobreescribe la función play para que seleccione la primera canción si selectedSong es null
+  const handlePlay = () => {
+    if (!selectedSong) {
+      // Selecciona la primera canción si no hay ninguna canción seleccionada
+      setSelectedSong(songs.canciones[0]);
+    }
+    play(); // Reproduce la canción
   };
 
   useEffect(() => {
@@ -40,7 +64,7 @@ const App = () => {
       <Footer 
         song={selectedSong} 
         isPlaying={isPlaying} 
-        play={play} 
+        play={handlePlay}  // Utiliza handlePlay en lugar de play
         pause={pause} 
         prev={prev} 
         next={next} 
