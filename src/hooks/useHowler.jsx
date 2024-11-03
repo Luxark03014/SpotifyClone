@@ -9,32 +9,25 @@ export const useHowler = (initialSrc, songs) => {
     const [duration, setDuration] = useState(0);
     const [analyser, setAnalyser] = useState(null);
     const [dataArray, setDataArray] = useState(null);
-
     useEffect(() => {
-        if (!songs || !songs.canciones || songs.canciones.length === 0) {
-            console.error("Songs or canciones are not defined.");
-            return;
-        }
-
         if (initialSrc) {
+            // Detener el sonido anterior si existe
+            if (sound) {
+                sound.stop();
+            }
+
+            // Crear un nuevo sonido con la nueva fuente
             const newSound = new Howl({
                 src: [initialSrc],
-                html5: true,
-                onload: () => {
-                    setDuration(newSound.duration());
-                },
-                onplay: () => {
-                    setIsPlaying(true);
-                },
-                onend: () => {
-                    next();
-                },
-                onpause: () => {
-                    setIsPlaying(false);
-                },
+                html5: true, // Para streaming
+                onplay: () => setIsPlaying(true),
+                onend: () => setIsPlaying(false),
+                onpause: () => setIsPlaying(false),
+                onstop: () => setIsPlaying(false),
             });
 
-            // Configurar el análisis de audio
+            setSound(newSound);
+            newSound.play(); // Comenzar a reproducir
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const analyserNode = audioContext.createAnalyser();
             analyserNode.fftSize = 2048;
@@ -49,26 +42,14 @@ export const useHowler = (initialSrc, songs) => {
             analyserNode.connect(audioContext.destination);
 
             setSound(newSound);
+            // Limpiar el efecto
+            return () => {
+                newSound.stop(); // Detener cuando el componente se desmonte o la fuente cambie
+                setSound(null); // Limpiar la referencia
+            };
+            
         }
-
-        return () => {
-            if (sound) {
-                sound.stop();
-                sound.unload();
-            }
-        };
-    }, [initialSrc, songs]);
-
-    useEffect(() => {
-        let intervalId;
-        if (isPlaying && sound) {
-            intervalId = setInterval(() => {
-                setCurrentTime(sound.seek());
-            }, 1000);
-        }
-        return () => clearInterval(intervalId);
-    }, [isPlaying, sound]);
-
+    }, [initialSrc]);
     const play = () => {
         if (sound) {
             sound.play();
@@ -90,6 +71,22 @@ export const useHowler = (initialSrc, songs) => {
         const newIndex = (currentSongIndex - 1 + songs.canciones.length) % songs.canciones.length;
         loadSong(newIndex);
     };
+    
+
+
+
+    
+    useEffect(() => {
+        let intervalId;
+        if (isPlaying && sound) {
+            intervalId = setInterval(() => {
+                setCurrentTime(sound.seek());
+            }, 1000);
+        }
+        return () => clearInterval(intervalId);
+    }, [isPlaying, sound]);
+
+   
 
     const loadSong = (index) => {
         if (songs.canciones[index]) {
