@@ -1,5 +1,5 @@
+import { Howl } from 'howler';
 import { useEffect, useState } from 'react';
-import { Howl, Howler } from 'howler';
 
 export const useHowler = (initialSrc, songs) => {
     const [sound, setSound] = useState(null);
@@ -22,19 +22,6 @@ export const useHowler = (initialSrc, songs) => {
                 html5: true,
                 onload: () => {
                     setDuration(newSound.duration());
-
-                    // Crear el analizador
-                    const audioContext = Howler.ctx;
-                    const analyserNode = audioContext.createAnalyser();
-                    analyserNode.fftSize = 2048;
-                    const bufferLength = analyserNode.frequencyBinCount;
-                    const newDataArray = new Uint8Array(bufferLength);
-                    setDataArray(newDataArray);
-                    setAnalyser(analyserNode);
-
-                    // Conectar el analizador al nodo de salida
-                    newSound.connect(analyserNode);
-                    analyserNode.connect(audioContext.destination);
                 },
                 onplay: () => {
                     setIsPlaying(true);
@@ -46,6 +33,20 @@ export const useHowler = (initialSrc, songs) => {
                     setIsPlaying(false);
                 },
             });
+
+            // Configurar el análisis de audio
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyserNode = audioContext.createAnalyser();
+            analyserNode.fftSize = 2048;
+            const bufferLength = analyserNode.frequencyBinCount;
+            const newDataArray = new Uint8Array(bufferLength);
+            setDataArray(newDataArray);
+            setAnalyser(analyserNode);
+
+            // Conectar el nodo al contexto de audio
+            const sourceNode = audioContext.createMediaElementSource(newSound._sounds[0]._node);
+            sourceNode.connect(analyserNode);
+            analyserNode.connect(audioContext.destination);
 
             setSound(newSound);
         }
@@ -92,7 +93,6 @@ export const useHowler = (initialSrc, songs) => {
 
     const loadSong = (index) => {
         if (songs.canciones[index]) {
-            const currentSong = songs.canciones[currentSongIndex];
             if (sound) {
                 sound.stop();
                 sound.unload();
@@ -110,8 +110,6 @@ export const useHowler = (initialSrc, songs) => {
                 },
             });
 
-            newSound.connect(analyser);
-            analyser.connect(Howler.masterGain);
             setSound(newSound);
             newSound.play();
         }

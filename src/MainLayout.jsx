@@ -1,14 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export const MainLayout = ({ currentSong, isPlaying, analyser, dataArray }) => {
+    const canvasRef = useRef(null);
+
     useEffect(() => {
-        const canvas = document.getElementById('equalizer');
-        const context = canvas.getContext('2d');
+        if (!analyser || !dataArray || !canvasRef.current) return;
+
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext("2d");
 
         const draw = () => {
-            if (!analyser || !dataArray) return;
+            if (!isPlaying) return;
 
-            context.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             analyser.getByteFrequencyData(dataArray);
 
             const barWidth = (canvas.width / dataArray.length) * 2.5;
@@ -17,24 +21,15 @@ export const MainLayout = ({ currentSong, isPlaying, analyser, dataArray }) => {
 
             for (let i = 0; i < dataArray.length; i++) {
                 barHeight = dataArray[i];
-
-                context.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
-                context.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
-
-                x += barWidth + 1; // Espaciado entre las barras
+                ctx.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
+                ctx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
+                x += barWidth + 1;
             }
 
             requestAnimationFrame(draw);
         };
 
-        // Comienza el dibujo solo si hay una canción y está en reproducción
-        if (isPlaying) {
-            draw();
-        }
-
-        return () => {
-            // Aquí puedes limpiar cualquier efecto si es necesario
-        };
+        draw();
     }, [analyser, dataArray, isPlaying]);
 
     return (
@@ -44,12 +39,7 @@ export const MainLayout = ({ currentSong, isPlaying, analyser, dataArray }) => {
                 <div>
                     <p className="text-lg">{currentSong.titulo}</p>
                     <p className="text-sm text-gray-400">{currentSong.artista}</p>
-                    <canvas 
-                        id="equalizer"
-                        width={600} 
-                        height={400} 
-                        className="mt-4 w-full bg-black"
-                    />
+                    <canvas ref={canvasRef} width={600} height={400} className="mt-4 w-full bg-black" />
                 </div>
             ) : (
                 <p>No song selected</p>
