@@ -9,7 +9,7 @@ export const PlayList = ({ onSongSelect }) => {
   };
 
   return (
-    <section className="w-1/4 bg-gris-spotify p-2 rounded-lg flex-grow">
+    <section className="w-1/4 bg-gris-spotify-oscuro p-2 rounded-lg flex-grow">
       <div className="flex items-center ">
         <img className="mt-4 mx-4 w-6 h-6" src="/assets/stack.png" />
         <h2 className="text-gris-texto mt-4 ">Tu biblioteca</h2>

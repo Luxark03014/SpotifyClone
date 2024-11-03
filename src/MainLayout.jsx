@@ -59,7 +59,7 @@ export const MainLayout = ({ currentSong, isPlaying, analyser, dataArray }) => {
     }, [analyser, dataArray, isPlaying]);
 
     return (
-        <div className="w-2/4 p-6 bg-gris-spotify-oscuro text-white rounded-lg shadow-lg flex flex-col items-center">
+        <div className="w-2/4 p-6 bg-gris-spotify text-white rounded-lg shadow-lg flex flex-col items-center">
             <h2 className="text-2xl font-bold mb-4 text-center">EQUALIZADOR</h2>
             {currentSong ? (
                 <div className="flex flex-col items-center">

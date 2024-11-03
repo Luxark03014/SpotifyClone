@@ -9,47 +9,61 @@ export const useHowler = (initialSrc, songs) => {
     const [duration, setDuration] = useState(0);
     const [analyser, setAnalyser] = useState(null);
     const [dataArray, setDataArray] = useState(null);
+    const [volume, setVolume] = useState(1);
+    const [highshelfGain, setHighshelfGain] = useState(0);
+    
     useEffect(() => {
+        let newSound = null;
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyserNode = audioContext.createAnalyser();
+        analyserNode.fftSize = 2048;
+        const bufferLength = analyserNode.frequencyBinCount;
+        const newDataArray = new Uint8Array(bufferLength);
+        setDataArray(newDataArray);
+        setAnalyser(analyserNode);
+
         if (initialSrc) {
-            // Detener el sonido anterior si existe
             if (sound) {
                 sound.stop();
             }
 
-            // Crear un nuevo sonido con la nueva fuente
-            const newSound = new Howl({
+            newSound = new Howl({
                 src: [initialSrc],
-                html5: true, // Para streaming
+                html5: true,
+                volume: volume,
                 onplay: () => setIsPlaying(true),
                 onend: () => setIsPlaying(false),
                 onpause: () => setIsPlaying(false),
                 onstop: () => setIsPlaying(false),
+                onload: () => { setDuration(newSound.duration()); },
             });
 
             setSound(newSound);
-            newSound.play(); // Comenzar a reproducir
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const analyserNode = audioContext.createAnalyser();
-            analyserNode.fftSize = 2048;
-            const bufferLength = analyserNode.frequencyBinCount;
-            const newDataArray = new Uint8Array(bufferLength);
-            setDataArray(newDataArray);
-            setAnalyser(analyserNode);
+            newSound.play();
 
-            // Conectar el nodo al contexto de audio
+            const highshelfFilter = audioContext.createBiquadFilter();
+            highshelfFilter.type = "highshelf";
+            highshelfFilter.frequency.value = 3000;
+            highshelfFilter.gain.value = highshelfGain;
+
             const sourceNode = audioContext.createMediaElementSource(newSound._sounds[0]._node);
-            sourceNode.connect(analyserNode);
+            sourceNode.connect(highshelfFilter);
+            highshelfFilter.connect(analyserNode);
             analyserNode.connect(audioContext.destination);
 
-            setSound(newSound);
-            // Limpiar el efecto
             return () => {
-                newSound.stop(); // Detener cuando el componente se desmonte o la fuente cambie
-                setSound(null); // Limpiar la referencia
+                newSound.stop();
+                setSound(null);
             };
-            
         }
-    }, [initialSrc]);
+    }, [initialSrc, highshelfGain]); // Añadir `highshelfGain` para que el filtro se actualice cuando cambie
+
+    useEffect(() => {
+        if (sound) {
+            sound.volume(volume);
+        }
+    }, [volume, sound]);
+
     const play = () => {
         if (sound) {
             sound.play();
@@ -71,11 +85,7 @@ export const useHowler = (initialSrc, songs) => {
         const newIndex = (currentSongIndex - 1 + songs.canciones.length) % songs.canciones.length;
         loadSong(newIndex);
     };
-    
 
-
-
-    
     useEffect(() => {
         let intervalId;
         if (isPlaying && sound) {
@@ -86,7 +96,9 @@ export const useHowler = (initialSrc, songs) => {
         return () => clearInterval(intervalId);
     }, [isPlaying, sound]);
 
-   
+    const changeHighshelfGain = (value) => {
+        setHighshelfGain(value);
+    };
 
     const loadSong = (index) => {
         if (songs.canciones[index]) {
@@ -105,6 +117,7 @@ export const useHowler = (initialSrc, songs) => {
                 onplay: () => {
                     setIsPlaying(true);
                 },
+                volume: volume,
             });
 
             setSound(newSound);
@@ -116,6 +129,13 @@ export const useHowler = (initialSrc, songs) => {
         if (sound) {
             sound.seek(time);
             setCurrentTime(time);
+        }
+    };
+
+    const changeVolume = (newVolume) => {
+        setVolume(newVolume);
+        if (sound) {
+            sound.volume(newVolume);
         }
     };
 
@@ -132,5 +152,9 @@ export const useHowler = (initialSrc, songs) => {
         seek,
         analyser,
         dataArray,
+        volume,
+        changeVolume,
+        highshelfGain,
+        changeHighshelfGain,
     };
 };

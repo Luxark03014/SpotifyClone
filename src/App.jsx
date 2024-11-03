@@ -9,7 +9,7 @@ import { useHowler } from './hooks/useHowler';
 
 const App = () => {
   const [selectedSong, setSelectedSong] = useState(null);
-  const { sound, play, pause, isPlaying, prev, next, currentSongIndex, currentTime, duration, seek, analyser, dataArray } = useHowler(selectedSong ? selectedSong.src : null, songs);
+  const { sound, play, pause, isPlaying, prev, next, currentSongIndex, currentTime, duration, seek, analyser, dataArray, changeVolume, changeHighshelfGain } = useHowler(selectedSong ? selectedSong.src : null, songs);
 
   const handleSongSelect = (song) => {
     setSelectedSong(song);
@@ -35,7 +35,7 @@ const App = () => {
           analyser={analyser} 
           dataArray={dataArray} 
         />
-        <InfoArtista song={selectedSong} />
+        <InfoArtista song={selectedSong} changeHighshelfGain={changeHighshelfGain}/>
       </div>
       <Footer 
         song={selectedSong} 
@@ -47,6 +47,7 @@ const App = () => {
         currentTime={currentTime} 
         duration={duration}
         seek={seek}
+        changeVolume={changeVolume} 
       />
     </div>
   );
